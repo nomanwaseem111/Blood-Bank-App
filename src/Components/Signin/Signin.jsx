@@ -1,10 +1,8 @@
-import * as React from 'react';
+import React, { useState } from "react";
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -12,6 +10,9 @@ import BloodtypeIcon from "@mui/icons-material/Bloodtype";
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { NavLink, useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase/firebase";
 
 function Copyright(props) {
   return (
@@ -29,14 +30,65 @@ function Copyright(props) {
 const theme = createTheme();
 
 export default function SignIn() {
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
-  };
+
+  const navigate = useNavigate()
+  
+   const [value,setValue] = useState({
+     email:"",
+     password:""
+   })
+
+   const [errorMessage, setErrorMessage] = useState("");
+
+   const loginHandler = (e) => {
+       e.preventDefault()
+  
+       if (
+    
+        !value.email ||
+        !value.password 
+     
+      ) {
+        setErrorMessage("Please Filled All Required Fields");
+        return;
+      }
+      setErrorMessage("");
+  
+      signInWithEmailAndPassword(auth, value.email, value.password).then(
+        (res) => {
+     
+          setValue({
+         
+            email: "",
+            password: "",
+          
+          });
+          swal({
+            title: "Signin Successfully",
+            icon: "success",
+            button: false,
+            timer: 3000,
+          });
+          navigate("/")
+         
+        }
+      ).catch((error) => {
+        setErrorMessage(error.message);
+        swal({
+          title: error.message,
+          icon: "error",
+          button: false,
+          timer: 3000,
+        });
+      });
+    };
+  
+
+   
+
+
+ 
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -56,7 +108,7 @@ export default function SignIn() {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <Box component="form" onSubmit={loginHandler} noValidate sx={{ mt: 1 }}>
             <TextField
               margin="normal"
               required
@@ -66,6 +118,8 @@ export default function SignIn() {
               name="email"
               autoComplete="email"
               autoFocus
+              value={value.email}
+              onChange={(e) => setValue({...value, email:e.target.value})}
             />
             <TextField
               margin="normal"
@@ -77,13 +131,19 @@ export default function SignIn() {
               type="password"
               id="password"
               autoComplete="current-password"
+              value={value.password}
+
+              onChange={(e) => setValue({...value, password:e.target.value})}
+
             />
+            <span className="errorMessage">{errorMessage}</span>
        
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+            
             >
               Sign In
             </Button>
@@ -94,9 +154,9 @@ export default function SignIn() {
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="#" variant="body2">
+                <NavLink to="/signup" variant="body2">
                   {"Don't have an account? Sign Up"}
-                </Link>
+                </NavLink>
               </Grid>
             </Grid>
           </Box>

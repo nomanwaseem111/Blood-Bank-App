@@ -16,25 +16,10 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import Swal from "sweetalert2";
-
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { collection, addDoc } from "firebase/firestore";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBMOq8f7uR4jkG_wJdXPxfSaJWDyOMaWh8",
-  authDomain: "blood-bank-application-4b85a.firebaseapp.com",
-  projectId: "blood-bank-application-4b85a",
-  storageBucket: "blood-bank-application-4b85a.appspot.com",
-  messagingSenderId: "433762300411",
-  appId: "1:433762300411:web:796aa38f56d025c3e31b5e",
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-export const db = getFirestore(app);
+import swal from "sweetalert";
+import { NavLink, useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "../../firebase/firebase";
 
 function Copyright(props) {
   return (
@@ -57,6 +42,8 @@ function Copyright(props) {
 const theme = createTheme();
 
 export default function SignUp() {
+  const navigate = useNavigate();
+
   const [value, setValue] = useState({
     firstname: "",
     lastname: "",
@@ -65,45 +52,54 @@ export default function SignUp() {
     number: "",
   });
 
-  const handleSubmit = async (e) => {
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    try {
-      const docRef = await addDoc(collection(db, "signup-users"), {
-        firstname: value.firstname,
-        lastname: value.lastname,
-        email: value.email,
-        password: value.password,
-        number: value.number,
-      });
-
-      setValue({
-        firstname: "",
-        lastname: "",
-        email: "",
-        password: "",
-        number: "",
-      });
-
-      Swal.fire({
-        position: "center",
-        icon: "success",
-        title: "User Signup Successfully",
-        showConfirmButton: false,
-        timer: 1500,
-      });
-
-      console.log("Document written with ID: ", docRef.id);
-    } catch (e) {
-      console.error("Error adding document: ", e);
-      Swal.fire({
-        position: "center",
-        icon: "error",
-        title: e.message,
-        showConfirmButton: false,
-        timer: 1500,
-      });
+    if (
+      !value.firstname ||
+      !value.lastname ||
+      !value.email ||
+      !value.password ||
+      !value.number
+    ) {
+      setErrorMessage("Please Filled All Required Fields");
+      return;
     }
+    setErrorMessage("");
+
+    createUserWithEmailAndPassword(auth, value.email, value.password).then(
+      (res) => {
+        const user = res.user;
+        updateProfile(user, {
+          displayName: value.firstname,
+        });
+        setValue({
+          firstname: "",
+          lastname: "",
+          email: "",
+          password: "",
+          number: "",
+        });
+        swal({
+          title: "Review Sent",
+          icon: "success",
+          button: false,
+          timer: 3000,
+        });
+        navigate("/signin")
+       
+      }
+    ).catch((error) => {
+      setErrorMessage(error.message);
+      swal({
+        title: error.message,
+        icon: "error",
+        button: false,
+        timer: 3000,
+      });
+    });
   };
 
   return (
@@ -133,10 +129,9 @@ export default function SignUp() {
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
-                required
+                  required
                   autoComplete="off"
                   name="firstname"
-                 
                   fullWidth
                   id="firstName"
                   label="First Name"
@@ -150,7 +145,6 @@ export default function SignUp() {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                 
                   id="lastName"
                   label="Last Name"
                   name="lastname"
@@ -165,7 +159,6 @@ export default function SignUp() {
                 <TextField
                   fullWidth
                   id="email"
-                 
                   label="Email Address"
                   name="email"
                   autoComplete="off"
@@ -180,7 +173,6 @@ export default function SignUp() {
                   fullWidth
                   name="password"
                   label="Password"
-                 
                   type="password"
                   id="password"
                   autoComplete="off"
@@ -196,7 +188,6 @@ export default function SignUp() {
                   name="number"
                   label="Number"
                   type="number"
-                 
                   id="number"
                   autoComplete="off"
                   value={value.number}
@@ -206,6 +197,7 @@ export default function SignUp() {
                 />
               </Grid>
             </Grid>
+            <span className="errorMessage">{errorMessage}</span>
             <Button
               type="submit"
               fullWidth
@@ -216,13 +208,9 @@ export default function SignUp() {
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link
-                  to="/Signin"
-                  variant="body2"
-                 
-                >
+                <NavLink to="/signin" variant="body2">
                   Already have an account? Sign in
-                </Link>
+                </NavLink>
               </Grid>
             </Grid>
           </Box>
