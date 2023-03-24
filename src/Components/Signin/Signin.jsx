@@ -56,7 +56,8 @@ export default function SignIn() {
   
       signInWithEmailAndPassword(auth, value.email, value.password).then(
         (res) => {
-     
+       
+          
           setValue({
          
             email: "",
@@ -69,7 +70,7 @@ export default function SignIn() {
             button: false,
             timer: 3000,
           });
-          navigate("/")
+          navigate("/dashboard")
          
         }
       ).catch((error) => {
@@ -154,7 +155,7 @@ export default function SignIn() {
                 </Link>
               </Grid>
               <Grid item>
-                <NavLink to="/signup" variant="body2">
+                <NavLink to="/" variant="body2">
                   {"Don't have an account? Sign Up"}
                 </NavLink>
               </Grid>
