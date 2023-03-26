@@ -3,6 +3,7 @@ import SignIn from "./Components/Signin/Signin";
 import SignUp from "./Components/Signup/Signup";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 import Dashboard from "./Components/DashBoard/Dashboard";
+import Profile from "./Components/Profile/Profile";
 
 
 function App() {
@@ -16,6 +17,8 @@ function App() {
           <Route path="/" element={<SignUp />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+
         </Routes>
       </BrowserRouter>
     </>
