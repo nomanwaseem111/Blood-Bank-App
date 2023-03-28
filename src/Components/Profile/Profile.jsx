@@ -1,200 +1,261 @@
-import React, { useEffect, useState } from "react";
-import { PhotoCamera } from "@mui/icons-material";
-import * as mdb from 'mdb-ui-kit'; // lib
+import React, { useState } from "react";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import CssBaseline from "@mui/material/CssBaseline";
+import TextField from "@mui/material/TextField";
+import Link from "@mui/material/Link";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import BloodtypeIcon from "@mui/icons-material/Bloodtype";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
+import swal from "sweetalert";
+import { NavLink, useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "../../firebase/firebase";
+import NavBar from '../NavBar/NavBar'
+import MenuItem from '@mui/material/MenuItem';
 
-import { IconButton, Paper, Skeleton, Stack } from "@mui/material";
-import {
-  getDownloadURL,
-  list,
-  listAll,
-  ref,
-  uploadBytesResumable,
-} from "firebase/storage";
-import NavBar from "../../components/navBar/NavBar";
-import { auth, storage } from "../../firebase/firebase";
 
-import './style.css'
-// import { MDBCol, MDBInput, MDBRow } from "mdb-react-ui-kit";
 
-export default function Profile() {
-  const [userName, setUserName] = useState("");
-  const [skeleton, setSkeleton] = useState(false);
-  const [fName, setFName] = useState("");
-  const [file, setFile] = useState([]);
-  console.log("🚀 ~ file: Home.jsx:18 ~ Home ~ file", file);
+function Copyright(props) {
+  return (
 
-  function handleChange(event) {
-    setFile(event.target.files[0]);
-  }
-  const imageListRef = ref(storage, "UserProfile/");
-  function handleUpload() {
-    if (!file) {
-      alert("Please choose a file first!");
+    <Typography
+      variant="body2"
+      color="text.secondary"
+      align="center"
+      {...props}
+    >
+      {"Copyright © "}
+      <Link color="inherit" href="https://mui.com/">
+        Your Website
+      </Link>{" "}
+      {new Date().getFullYear()}
+      {"."}
+    </Typography>
+  );
+}
+
+const theme = createTheme();
+
+export default function SignUp() {
+  const navigate = useNavigate();
+
+  const [value, setValue] = useState({
+    name: "",
+    age: "",
+    number: "",
+    area: "",
+   
+  });
+
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (
+      !value.name ||
+      !value.age ||
+   
+      !value.number ||
+      !value.area
+    ) {
+      setErrorMessage("Please Filled All Required Fields");
+      return;
     }
+    setErrorMessage("");
 
-    const storageRef = ref(storage, `/UserProfile/${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
 
-    uploadTask.on(
-      "state_changed",
+    console.log(value);
 
-      (err) => console.log(err),
-      () => {
-        // download url
-        getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-          alert("upload image");
-          console.log(url);
-        });
-      }
-    );
-  }
+  
+  };
 
-  useEffect(() => {
-    setSkeleton(true);
 
-    listAll(imageListRef).then((response) => {
-      response.items.forEach((item) => {
-        getDownloadURL(item).then((url) => {
-          setSkeleton(false);
-          setFile((prev) => [...prev, url]);
-        });
-      });
-    });
-  }, []);
-
-  useEffect(() => {
-    auth.onAuthStateChanged((user) => {
-      console.log(
-        "🚀 ~ file: Home.jsx:59 ~ auth.onAuthStateChanged ~ user",
-        user
-      );
-      if (!user) {
-        setUserName(user.displayName);
-      } else {
-        setUserName("");
-      }
-    });
-  }, []);
+  
 
   return (
-    <div>
-      <div>
-        <div>
-          <NavBar profile={file[0]} />
-        </div>
-        {/* <h1 color="black">hello my name is {userName} </h1> */}
-
-        {skeleton ? (
-          <Paper
-          
+    <>
+      <NavBar />
+      <ThemeProvider theme={theme}>
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <Box
             sx={{
-              width: "50%",
-              height: "auto",
+              marginTop: 8,
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
-              justifyContent: "center",
-              ml: { xl: "32rem", md: "22rem" },
-              mt: { xl: "12rem", md: "3rem" },
             }}
-            elevation={7}
           >
-            <Stack alignItems="center" spacing={1}>
-              <Skeleton
-                sx={{ mt: "1rem" }}
-                variant="circular"
-                width={200}
-                height={200}
-              />
-              <Skeleton variant="rectangular" width={200} height={80} />
-              <Stack gap={2} direction="row">
-                <Skeleton variant="rectangular" width={210} height={60} />
-                <Skeleton variant="rounded" width={210} height={60} />
-              </Stack>{" "}
-              {/**/}
-            </Stack>
-          </Paper>
-        ) : (
-          <Paper
-            sx={{
-              width: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              ml: { xl: "32rem", md: "22rem" },
-              mt: { xl: "12rem", md: "3rem" },
-            }}
-            elevation={7}
-          >
-            <Stack >
-              <Stack
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <img
-                  style={{
-                    border: "4px solid #cddc39",
-                    padding: "2px",
-                    borderRadius: "50%",
-                    borderTopColor: "#ff5722",
-                    borderLeftColor: "#ff5722",
-
-                    marginTop: "1rem",
-                    marginLeft: "1rem",
-                    filter: "drop-shadow(0 0 5px #ff5722)",
-                  }}
-                  width={200}
-                  height={200}
-                  src={file[0]}
-                  alt=""
-                />
-                <IconButton
-                  color="primary"
-                  aria-label="upload picture"
-                  component="label"
-                >
-                  <PhotoCamera />
-                  <input
-                    hidden
-                    accept="image/*"
-                    type="file"
-                    onChange={handleChange}
+            <Avatar sx={{ m: 1, bgcolor: "red" }}>
+              <BloodtypeIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Register as Donor
+            </Typography>
+            <Box
+              component="form"
+              noValidate
+              onSubmit={handleSubmit}
+              sx={{ mt: 3 }}
+            >
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={12}>
+                  <TextField
+                    required
+                    autoComplete="off"
+                    name="name"
+                    fullWidth
+                    id="name"
+                    label="Name"
+                    autoFocus
+                    value={value.name}
+                    onChange={(e) =>
+                      setValue({ ...value, name: e.target.value })
+                    }
                   />
-                </IconButton>
-                <button className="button-30" onClick={handleUpload}>
-                  Upload
-                </button>
-                 
-                <MDBRow>
-                  <MDBCol col="6">
-                    <MDBInput
-                      wrapperClass="mb-4"
-                      label="First name"
-                      onChange={(e) => setFName(e.target.value)}
-                      id="form1"
-                      type="text"
-                      required
-                    />
-                  </MDBCol>
+                </Grid>
 
-                  <MDBCol col="6">
-                    <MDBInput
-                      wrapperClass="mb-4"
-                      label="Last name"
-                      onChange={(e) => setFName(e.target.value)}
-                      id="form2"
-                      type="text"
-                      required
-                    />
-                  </MDBCol>
-                </MDBRow>
-              </Stack>
-            </Stack>
-          </Paper>
-        )}
-      </div>
-    </div>
+
+
+
+
+                <Grid item xs={12}>
+                  <TextField
+                    type="number"
+                    fullWidth
+                    id="age"
+                    label="Age"
+                    name="age"
+                    autoComplete="off"
+                    value={value.age}
+                    onChange={(e) =>
+                      setValue({ ...value, age: e.target.value })
+                    }
+                  />
+                </Grid>
+
+
+{/* 
+                <Grid item xs={12}>
+
+                  <FormControl>
+                    <FormLabel id="demo-radio-buttons-group-label" >Gender</FormLabel>
+                    <RadioGroup
+                      aria-labelledby="demo-radio-buttons-group-label"
+                      defaultValue="female"
+                      name="radio-buttons-group"
+                    >
+                      <FormControlLabel value="female" control={<Radio />} label="Female" />
+                      <FormControlLabel value="male" control={<Radio />} label="Male" />
+                      <FormControlLabel value="other" control={<Radio />} label="Other" />
+                    </RadioGroup>
+                  </FormControl>
+
+
+                </Grid> */}
+
+
+
+
+
+                {/* <Grid item xs={12}>
+                  <Box
+                    component="form"
+                    sx={{
+                      '& .MuiTextField-root': { m: 1, width: '400px' },
+                    }}
+                    noValidate
+                    autoComplete="off"
+
+                  >
+
+
+
+                    <TextField
+                      id="bloodType"
+                      select
+                      label="Blood Type"
+                      defaultValue="bloodType"
+                      SelectProps={{
+                        native: true,
+                      }}
+
+
+                    >
+
+                      <option value="positive" >B Positive</option>
+                      <option value="negative" >0 Negative</option>
+
+                    </TextField>
+
+
+                  </Box>
+                </Grid> */}
+
+
+                <Grid item xs={12}>
+                  <TextField
+                    type="number"
+                    fullWidth
+                    id="number"
+                    label="Number"
+                    name="number"
+                    autoComplete="off"
+                    value={value.number}
+                    onChange={(e) =>
+                      setValue({ ...value, number: e.target.value })
+                    }
+                  />
+                </Grid>
+
+
+                <Grid item xs={12} sm={12}>
+                  <TextField
+                    required
+                    autoComplete="off"
+                    name="area"
+                    fullWidth
+                    id="area"
+                    label="Area"
+                    autoFocus
+                    value={value.area}
+                    onChange={(e) =>
+                      setValue({ ...value, area: e.target.value })
+                    }
+                  />
+                </Grid>
+
+              </Grid>
+
+
+
+
+
+
+              <span className="errorMessage">{errorMessage}</span>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+              >
+                Register
+              </Button>
+
+            </Box>
+          </Box>
+        </Container>
+      </ThemeProvider>
+    </>
   );
 }

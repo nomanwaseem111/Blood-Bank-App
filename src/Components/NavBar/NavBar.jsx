@@ -1,100 +1,136 @@
-import React from "react";
-import { getAuth, signOut } from "firebase/auth";
-import { NavLink, useNavigate } from "react-router-dom";
-import todoLogo from "../../assets/react.svg";
+import * as React from 'react';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import Menu from '@mui/material/Menu';
+import MenuIcon from '@mui/icons-material/Menu';
+import Container from '@mui/material/Container';
+import Avatar from '@mui/material/Avatar';
+import Tooltip from '@mui/material/Tooltip';
+import MenuItem from '@mui/material/MenuItem';
+import AdbIcon from '@mui/icons-material/Adb';
+import { Link } from 'react-router-dom';
+import Logo from '../../assets/logo.png'
 
-export default function NavBar({ profile }) {
-  let navigate = useNavigate();
+function ResponsiveAppBar() {
+  const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const [anchorElUser, setAnchorElUser] = React.useState(null);
 
-  const handleClick = () => {
-    const auth = getAuth();
-    signOut(auth)
-      .then(() => {
-        navigate("/signin");
-      })
-      .catch((error) => {
-        alert({ html: error.message, classes: "red" });
-      });
+  const handleOpenNavMenu = (event) => {
+    setAnchorElNav(event.currentTarget);
   };
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseNavMenu = () => {
+    setAnchorElNav(null);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
   return (
-    <div>
-      <nav className="navbar navbar-expand-lg navbar-light bg-dark">
-        <div className="container-fluid">
-          <div
-            className="collaps e navbar-collapse"
-            id="navbarSupportedContent"
-          >
-            <a className="navbar-brand mt-2 mt-lg-0" href="/dashboard">
-              <img
-                src={todoLogo}
-                alt="logo-image"
-                loading="lazy"
-                height={60}
-                width={80}
-              />
-            </a>
-            <div
-              style={{
-                marginLeft: "32rem",
+    <AppBar position="static" style={{background:"red"}} >
+      <Container maxWidth="xl">
+        <Toolbar disableGutters>
+          <Box component="img" src={Logo} sx={{width:{md:"40px"}}}>
+          </Box>
+         
+
+          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleOpenNavMenu}
+              color="inherit"
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorElNav}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+              open={Boolean(anchorElNav)}
+              onClose={handleCloseNavMenu}
+              sx={{
+                display: { xs: 'block', md: 'none' },
               }}
             >
-              <p
-                style={{
-                  fontFamily: "inherit",
-                  marginTop: "1rem",
-                  fontSize: "30px",
-                }}
-              >
-                Blood Bank App
-              </p>
-            </div>
-          </div>
-          <div className="d-flex align-items-center">
-            <div className="dropdown">
-              <a
-                className="dropdown-toggle d-flex align-items-center hidden-arrow"
-                id="navbarDropdownMenuAvatar"
-                role="button"
-                data-mdb-toggle="dropdown"
-                aria-expanded="false"
-              >
-                <img
-                  src={profile}
-                  className="rounded-circle"
-                  alt="profile"
-                  loading="lazy"
-                  height={60}
-                  width={60}
-                  style={{
-                    border: "4px solid #cddc39",
-                    padding: "2px",
-                    borderRadius: "50%",
-                    borderTopColor: "#ff5722",
-                    borderLeftColor: "#ff5722",
-                    filter: "drop-shadow(0 0 5px #ff5722)",
-                  }}
-                />
-              </a>
-              <ul
-                className="dropdown-menu dropdown-menu-end"
-                aria-labelledby="navbarDropdownMenuAvatar"
-              >
-                <li>
-                  <NavLink className="dropdown-item" to='/profile'>
-                    My profile
-                  </NavLink>
-                </li>
+             
+            </Menu>
+          </Box>
+          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+          <Typography
+            variant="h5"
+            noWrap
+            component="a"
+            href=""
+            sx={{
+              mr: 2,
+              display: { xs: 'flex', md: 'none' },
+              flexGrow: 1,
+              fontFamily: 'monospace',
+              fontWeight: 700,
+              letterSpacing: '.3rem',
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+          >
+            DashBoard
+          </Typography>
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } ,justifyContent:{md:"space-around"} }} >
+           <Link style={{color:"#fff"}} to="/donor" >Donor</Link>
+           <Link style={{color:"#fff"}} to="/profile" >Profile</Link>
+           <Link style={{color:"#fff"}} >Logout</Link>
 
-                <li>
-                  <NavLink onClick={handleClick} className="dropdown-item" to="">
-                    Logout
-                  </NavLink>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </nav>
-    </div>
+          </Box>
+
+          <Box sx={{ flexGrow: 0 }}>
+            <Tooltip title="Open settings">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              sx={{ mt: '45px' }}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              
+                <MenuItem  onClick={handleCloseUserMenu}>
+                  <Typography component={Link} to='/dashboard' textAlign="center">DashBoard</Typography>
+                </MenuItem>
+         
+            </Menu>
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
   );
 }
+export default ResponsiveAppBar;
