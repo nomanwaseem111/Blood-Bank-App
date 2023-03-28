@@ -10,23 +10,21 @@ import BloodtypeIcon from "@mui/icons-material/Bloodtype";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
 import swal from "sweetalert";
 import { NavLink, useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
-import NavBar from '../NavBar/NavBar'
-import MenuItem from '@mui/material/MenuItem';
-
-
-
+import NavBar from "../NavBar/NavBar";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
 function Copyright(props) {
   return (
-
     <Typography
       variant="body2"
       color="text.secondary"
@@ -48,39 +46,31 @@ const theme = createTheme();
 export default function SignUp() {
   const navigate = useNavigate();
 
-  const [value, setValue] = useState({
-    name: "",
-    age: "",
-    number: "",
-    area: "",
-   
-  });
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+  const [gender, setGender] = useState("");
+  const [number, setNumber] = useState("");
+  const [area, setArea] = useState("");
+  const [blood, setBlood] = useState("");
 
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (
-      !value.name ||
-      !value.age ||
-   
-      !value.number ||
-      !value.area
-    ) {
+    if (!name || !age || !gender || !number || !area || !blood) {
       setErrorMessage("Please Filled All Required Fields");
       return;
     }
     setErrorMessage("");
 
-
-    console.log(value);
-
-  
+    console.log(name);
+    console.log(age);
+    console.log(gender);
+    console.log(number);
+    console.log(area);
+    console.log(blood);
   };
-
-
-  
 
   return (
     <>
@@ -118,16 +108,10 @@ export default function SignUp() {
                     id="name"
                     label="Name"
                     autoFocus
-                    value={value.name}
-                    onChange={(e) =>
-                      setValue({ ...value, name: e.target.value })
-                    }
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                   />
                 </Grid>
-
-
-
-
 
                 <Grid item xs={12}>
                   <TextField
@@ -137,71 +121,42 @@ export default function SignUp() {
                     label="Age"
                     name="age"
                     autoComplete="off"
-                    value={value.age}
-                    onChange={(e) =>
-                      setValue({ ...value, age: e.target.value })
-                    }
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
                   />
                 </Grid>
 
-
-{/* 
                 <Grid item xs={12}>
-
                   <FormControl>
-                    <FormLabel id="demo-radio-buttons-group-label" >Gender</FormLabel>
+                    <FormLabel id="demo-radio-buttons-group-label">
+                      Gender
+                    </FormLabel>
                     <RadioGroup
                       aria-labelledby="demo-radio-buttons-group-label"
                       defaultValue="female"
                       name="radio-buttons-group"
                     >
-                      <FormControlLabel value="female" control={<Radio />} label="Female" />
-                      <FormControlLabel value="male" control={<Radio />} label="Male" />
-                      <FormControlLabel value="other" control={<Radio />} label="Other" />
+                      <FormControlLabel
+                        value="female"
+                        control={<Radio />}
+                        label="Female"
+                        onChange={(e) => setGender(e.target.value)}
+                      />
+                      <FormControlLabel
+                        value="male"
+                        control={<Radio />}
+                        label="Male"
+                        onChange={(e) => setGender(e.target.value)}
+                      />
+                      <FormControlLabel
+                        value="other"
+                        control={<Radio />}
+                        label="Other"
+                        onChange={(e) => setGender(e.target.value)}
+                      />
                     </RadioGroup>
                   </FormControl>
-
-
-                </Grid> */}
-
-
-
-
-
-                {/* <Grid item xs={12}>
-                  <Box
-                    component="form"
-                    sx={{
-                      '& .MuiTextField-root': { m: 1, width: '400px' },
-                    }}
-                    noValidate
-                    autoComplete="off"
-
-                  >
-
-
-
-                    <TextField
-                      id="bloodType"
-                      select
-                      label="Blood Type"
-                      defaultValue="bloodType"
-                      SelectProps={{
-                        native: true,
-                      }}
-
-
-                    >
-
-                      <option value="positive" >B Positive</option>
-                      <option value="negative" >0 Negative</option>
-
-                    </TextField>
-
-
-                  </Box>
-                </Grid> */}
-
+                </Grid>
 
                 <Grid item xs={12}>
                   <TextField
@@ -211,13 +166,29 @@ export default function SignUp() {
                     label="Number"
                     name="number"
                     autoComplete="off"
-                    value={value.number}
-                    onChange={(e) =>
-                      setValue({ ...value, number: e.target.value })
-                    }
+                    value={number}
+                    onChange={(e) => setNumber(e.target.value)}
                   />
                 </Grid>
 
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="demo-simple-select-label">
+                      Blood Group
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      label="bloodGroup"
+                      value={blood}
+                      onChange={(e) => setBlood(e.target.value)}
+                    >
+                      <MenuItem value="B Postive">B Postive</MenuItem>
+                      <MenuItem value="O Negative">O Negative</MenuItem>
+                      <MenuItem value="A+ Positve">A+ Positve</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
 
                 <Grid item xs={12} sm={12}>
                   <TextField
@@ -228,19 +199,11 @@ export default function SignUp() {
                     id="area"
                     label="Area"
                     autoFocus
-                    value={value.area}
-                    onChange={(e) =>
-                      setValue({ ...value, area: e.target.value })
-                    }
+                    value={area}
+                    onChange={(e) => setArea(e.target.value)}
                   />
                 </Grid>
-
               </Grid>
-
-
-
-
-
 
               <span className="errorMessage">{errorMessage}</span>
               <Button
@@ -251,7 +214,6 @@ export default function SignUp() {
               >
                 Register
               </Button>
-
             </Box>
           </Box>
         </Container>

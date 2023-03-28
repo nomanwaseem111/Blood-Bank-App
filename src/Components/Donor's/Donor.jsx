@@ -1,13 +1,11 @@
 import React from 'react'
 import NavBar from '../NavBar/NavBar'
+
 const Donor = () => {
-  
-  
-  
   return (
     <>
-<NavBar />
-
+      <NavBar/>
+      <h2>Donor</h2>
     </>
   )
 }

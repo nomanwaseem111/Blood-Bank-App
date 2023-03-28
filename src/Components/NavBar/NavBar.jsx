@@ -34,10 +34,10 @@ function ResponsiveAppBar() {
   };
 
   return (
-    <AppBar position="static" style={{background:"red"}} >
+    <AppBar position="fixed" style={{background:"red"}} >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Box component="img" src={Logo} sx={{width:{md:"40px"}}}>
+          <Box component="img" src={Logo} sx={{width:{md:"40px",xs:'30px'}}}>
           </Box>
          
 
@@ -73,25 +73,7 @@ function ResponsiveAppBar() {
              
             </Menu>
           </Box>
-          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href=""
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            DashBoard
-          </Typography>
+          
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } ,justifyContent:{md:"space-around"} }} >
            <Link style={{color:"#fff"}} to="/donor" >Donor</Link>
            <Link style={{color:"#fff"}} to="/profile" >Profile</Link>
