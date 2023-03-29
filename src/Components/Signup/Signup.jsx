@@ -18,8 +18,16 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import swal from "sweetalert";
 import { NavLink, useNavigate } from "react-router-dom";
+import {collection,addDoc} from 'firebase/firestore'
+import { db } from "../../firebase/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
+
+
+
+
+
+
 
 function Copyright(props) {
   return (
@@ -52,26 +60,30 @@ export default function SignUp() {
     number: "",
   });
 
-  const [errorMessage, setErrorMessage] = useState("");
+  const [error,setError] = useState("")
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit =  (e) => {
+      e.preventDefault()
 
-    if (
-      !value.firstname ||
-      !value.lastname ||
-      !value.email ||
-      !value.password ||
-      !value.number
-    ) {
-      setErrorMessage("Please Filled All Required Fields");
-      return;
-    }
-    setErrorMessage("");
-
-    createUserWithEmailAndPassword(auth, value.email, value.password).then(
-      (res) => {
+        
+        
+  
+      createUserWithEmailAndPassword(auth, value.email, value.password)
+      .then(async(res) => {
+        
         const user = res.user;
+        try {
+          const docRef = await addDoc(collection(db, "Users"), {
+            firstname: value.firstname,
+            lastname: value.lastname,
+            email: value.email,
+            password: value.password,
+            number: value.number,
+          });
+          console.log("Document written with ID: ", docRef.id);
+        } catch (e) {
+          console.error("Error adding document: ", e);
+        }
         updateProfile(user, {
           displayName: value.firstname,
         });
@@ -83,24 +95,30 @@ export default function SignUp() {
           number: "",
         });
         swal({
-          title: "Review Sent",
+          title: "Signup Successfully",
           icon: "success",
           button: false,
           timer: 3000,
         });
-        navigate("/signin")
-       
-      }
-    ).catch((error) => {
-      setErrorMessage(error.message);
-      swal({
-        title: error.message,
-        icon: "error",
-        button: false,
-        timer: 3000,
+        
+        navigate("/signin");
+      })
+      .catch((error) => {
+        setError(error.message);
+        swal({
+          title: error.message,
+          icon: "error",
+          button: false,
+          timer: 3000,
+        });
       });
-    });
-  };
+          
+
+
+        
+      
+
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -201,7 +219,7 @@ export default function SignUp() {
                 />
               </Grid>
             </Grid>
-            <span className="errorMessage">{errorMessage}</span>
+            <span>{error}</span>
             <Button
               type="submit"
               fullWidth

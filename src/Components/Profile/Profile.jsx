@@ -17,12 +17,15 @@ import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import swal from "sweetalert";
 import { NavLink, useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "../../firebase/firebase";
+
 import NavBar from "../NavBar/NavBar";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
+import {collection,addDoc} from 'firebase/firestore'
+
+import { db } from "../../firebase/firebase";
+
 function Copyright(props) {
   return (
     <Typography
@@ -44,7 +47,7 @@ function Copyright(props) {
 const theme = createTheme();
 
 export default function SignUp() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
@@ -55,7 +58,9 @@ export default function SignUp() {
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
+  
+  
     e.preventDefault();
 
     if (!name || !age || !gender || !number || !area || !blood) {
@@ -64,12 +69,41 @@ export default function SignUp() {
     }
     setErrorMessage("");
 
-    console.log(name);
-    console.log(age);
-    console.log(gender);
-    console.log(number);
-    console.log(area);
-    console.log(blood);
+    try {
+      const docRef = await addDoc(collection(db, "Profile"), {
+        name:name,
+        age:age,
+        gender:gender,
+        number:number,
+        blood:blood,
+        area:area
+      });
+      setName("");
+      setAge("");
+      setGender("");
+      setNumber("");
+      setArea("")
+      setBlood("")
+
+      swal({
+        title: "Profile Date Saved",
+        icon: "success",
+        button: false,
+        timer: 3000,
+      });
+      console.log("Document written with ID: ", docRef.id);
+      navigate('/donor')
+    } catch (e) {
+      console.error("Error adding document: ", e);
+      swal({
+        title: e.message,
+        icon: "error",
+        button: false,
+        timer: 3000,
+      });
+    }
+
+ 
   };
 
   return (

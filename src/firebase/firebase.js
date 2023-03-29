@@ -1,20 +1,17 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
-import { getStorage } from "firebase/storage";
+import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyD81nCVtarM2yA8rkjOJwG-lOO-p7pl52s",
-  authDomain: "blood-bank-app-be90b.firebaseapp.com",
-  projectId: "blood-bank-app-be90b",
-  storageBucket: "blood-bank-app-be90b.appspot.com",
-  messagingSenderId: "455629734296",
-  appId: "1:455629734296:web:8395836efa919c704fabed",
-  measurementId: "G-978MVLZWW0",
+  apiKey: "AIzaSyAqCojyp28IvImfR-2BjESMRwtVlVg9_ao",
+  authDomain: "blood-bank-669a3.firebaseapp.com",
+  projectId: "blood-bank-669a3",
+  storageBucket: "blood-bank-669a3.appspot.com",
+  messagingSenderId: "84876046626",
+  appId: "1:84876046626:web:9c1f854971d4d9a296357b"
 };
 
 const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
-const auth = getAuth();
-const db = getDatabase(app);
-
-export { app,auth, storage, db };
+const auth = getAuth() 
+export const db = getFirestore(app);
+export { app,auth };
