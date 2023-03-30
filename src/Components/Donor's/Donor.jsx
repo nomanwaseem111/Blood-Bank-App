@@ -10,7 +10,7 @@ import Stack from '@mui/material/Stack';
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { db } from '../../firebase/firebase';
 import { useState,useEffect } from 'react';
-
+import TextField from '@mui/material/TextField';
 
 
 
@@ -21,6 +21,8 @@ const Donor = () => {
   
   
   const [data, setData] = useState([])
+  const [filterData, setFilterData] = useState([])
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     let unsubscribe = null;
@@ -33,6 +35,7 @@ const Donor = () => {
           profile.push(doc.data());
         });
         setData(profile);
+        setFilterData(profile)
       });
     };
     getRealTimeData();
@@ -43,7 +46,21 @@ const Donor = () => {
   }, []);
 
 
-  console.log(data);
+
+
+  const handleSearch = (e) => {
+    const getSearch = e.target.value
+
+    if(getSearch.length > 0){
+
+      const searchData = data.filter((item) => item.name.toLowerCase().includes(getSearch) )
+      setData(searchData);
+    }else{
+       setData(filterData)
+    }
+    setSearch(getSearch)
+
+  }
   
   return (
     <>
@@ -119,6 +136,14 @@ const Donor = () => {
       </CardActions>
     </Card>
       </Stack> */}
+      <h1 style={{display:"flex",justifyContent:"center",alignItems:"center"}}>Search Donors</h1>
+     <div style={{display:"flex",justifyContent:"center",alignItems:"center"}}>
+      
+       <input type="text" value={search} onChange={(e) => handleSearch(e)}  style={{width:"500px"}}/>
+
+  
+     </div>
+
       <Stack  width={{md:"80%"}} margin={{md:"auto"}} direction={{md:"row"}} display={{md:"flex"}} justifyContent={{md:"space-around"}}>
  
      
