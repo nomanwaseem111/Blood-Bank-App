@@ -22,7 +22,7 @@ import {collection,addDoc} from 'firebase/firestore'
 import { db } from "../../firebase/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
-
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 
 
@@ -52,6 +52,7 @@ const theme = createTheme();
 export default function SignUp() {
   const navigate = useNavigate();
 
+  const [showPassword,setShowPassword] = useState(false)
   const [value, setValue] = useState({
     firstname: "",
     lastname: "",
@@ -195,7 +196,7 @@ export default function SignUp() {
                   fullWidth
                   name="password"
                   label="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   autoComplete="off"
                   value={value.password}
@@ -203,6 +204,7 @@ export default function SignUp() {
                     setValue({ ...value, password: e.target.value })
                   }
                 />
+                <VisibilityOffIcon value={showPassword}  onClick={() => setShowPassword(!showPassword)} />
               </Grid>
               <Grid item xs={12}>
                 <TextField

@@ -17,15 +17,16 @@ import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import swal from "sweetalert";
 import { NavLink, useNavigate } from "react-router-dom";
+import Checkbox from "@mui/material/Checkbox";
+import FormGroup from "@mui/material/FormGroup";
 
 import NavBar from "../NavBar/NavBar";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
-import {collection,addDoc} from 'firebase/firestore'
-
+import { collection, addDoc } from "firebase/firestore";
+import CITIES from "../../api/cities.json";
 import { db } from "../../firebase/firebase";
-
 function Copyright(props) {
   return (
     <Typography
@@ -47,52 +48,47 @@ function Copyright(props) {
 const theme = createTheme();
 
 export default function SignUp() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [number, setNumber] = useState("");
-  const [area, setArea] = useState("");
+  const [available, setAvailable] = useState(false);
   const [blood, setBlood] = useState("");
+  const [city, setCity] = useState("");
 
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e) => {
-  
-  
     e.preventDefault();
-
-    if (!name || !age || !gender || !number || !area || !blood) {
-      setErrorMessage("Please Filled All Required Fields");
-      return;
-    }
-    setErrorMessage("");
 
     try {
       const docRef = await addDoc(collection(db, "Profile"), {
-        name:name,
-        age:age,
-        gender:gender,
-        number:number,
-        blood:blood,
-        area:area
+        name: name,
+        age: age,
+        gender: gender,
+        number: number,
+        available: available,
+        blood: blood,
+        city: city,
+
       });
       setName("");
       setAge("");
       setGender("");
       setNumber("");
-      setArea("")
-      setBlood("")
+      setAvailable("");
+      setBlood("");
+      setCity("");
 
       swal({
-        title: "Profile Date Saved",
+        title: "Profile Updated",
         icon: "success",
         button: false,
         timer: 3000,
       });
       console.log("Document written with ID: ", docRef.id);
-      navigate('/donor')
     } catch (e) {
       console.error("Error adding document: ", e);
       swal({
@@ -103,7 +99,6 @@ export default function SignUp() {
       });
     }
 
- 
   };
 
   return (
@@ -224,18 +219,47 @@ export default function SignUp() {
                   </FormControl>
                 </Grid>
 
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="demo-simple-select-label">
+                      Cities
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      label="Cities"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                    >
+                     {
+                      CITIES.map((e,i) => {
+                        return(
+                         <MenuItem key={i} value={e.name}  >{e.name}</MenuItem> 
+
+                        )
+                      })
+                     }
+
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+             
+
                 <Grid item xs={12} sm={12}>
-                  <TextField
-                    required
-                    autoComplete="off"
-                    name="area"
-                    fullWidth
-                    id="area"
-                    label="Area"
-                    autoFocus
-                    value={area}
-                    onChange={(e) => setArea(e.target.value)}
-                  />
+                  <FormGroup>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          value={available}
+                          onChange={(e) =>
+                           setAvailable(e.target.checked)
+                          }
+                        />
+                      }
+                      label="Available"
+                    />
+                  </FormGroup>
                 </Grid>
               </Grid>
 

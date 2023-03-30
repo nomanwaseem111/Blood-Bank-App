@@ -13,6 +13,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { Link } from 'react-router-dom';
 import Logo from '../../assets/logo.png'
+import { getAuth, signOut } from "firebase/auth";
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -33,8 +34,20 @@ function ResponsiveAppBar() {
     setAnchorElUser(null);
   };
 
+
+  const handleClick = () => {
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        navigate("/signin");
+      })
+      .catch((error) => {
+        alert("User Logout");
+      });
+  };
+
   return (
-    <AppBar position="fixed" style={{background:"red"}} >
+    <AppBar position="static" style={{background:"red"}} >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Box component="img" src={Logo} sx={{width:{md:"40px",xs:'30px'}}}>
@@ -77,7 +90,7 @@ function ResponsiveAppBar() {
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } ,justifyContent:{md:"space-around"} }} >
            <Link style={{color:"#fff"}} to="/donor" >Donor</Link>
            <Link style={{color:"#fff"}} to="/profile" >Profile</Link>
-           <Link style={{color:"#fff"}} >Logout</Link>
+           <Link style={{color:"#fff"}} onClick={handleClick} >Logout</Link>
 
           </Box>
 

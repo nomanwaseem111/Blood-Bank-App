@@ -70,7 +70,7 @@ export default function SignIn() {
             button: false,
             timer: 3000,
           });
-          navigate("/dashboard")
+          navigate("/donor")
          
         }
       ).catch((error) => {
