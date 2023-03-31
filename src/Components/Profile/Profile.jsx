@@ -212,9 +212,15 @@ export default function SignUp() {
                       value={blood}
                       onChange={(e) => setBlood(e.target.value)}
                     >
-                      <MenuItem value="B Postive">B Postive</MenuItem>
-                      <MenuItem value="O Negative">O Negative</MenuItem>
-                      <MenuItem value="A+ Positve">A+ Positve</MenuItem>
+                      <MenuItem value="A+ Positive">A+</MenuItem>
+                      <MenuItem value="A- Negative">A-</MenuItem>
+                      <MenuItem value="B+ Positive">B+</MenuItem>
+                      <MenuItem value="B- Negative">B-</MenuItem>
+                      <MenuItem value="O+ Positive">O+</MenuItem>
+                      <MenuItem value="O- Negative">O-</MenuItem>
+                      <MenuItem value="AB+">AB+</MenuItem>
+                      <MenuItem value="AB-">AB-</MenuItem>
+
                     </Select>
                   </FormControl>
                 </Grid>

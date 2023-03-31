@@ -53,9 +53,10 @@ const Donor = () => {
 
     if(getSearch.length > 0){
 
-      const searchData = data.filter((item) => item.name.toLowerCase().includes(getSearch) )
+      const searchData = data.filter((item) => item.name.toLowerCase().includes(getSearch) || item.city.toLowerCase().includes(getSearch) ||  item.blood.toUpperCase().includes(getSearch) )
       setData(searchData);
-    }else{
+    }
+    else{
        setData(filterData)
     }
     setSearch(getSearch)
