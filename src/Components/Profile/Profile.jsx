@@ -24,7 +24,7 @@ import NavBar from "../NavBar/NavBar";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, query, onSnapshot } from "firebase/firestore";
 import CITIES from "../../api/cities.json";
 import { db } from "../../firebase/firebase";
 function Copyright(props) {
@@ -60,10 +60,38 @@ export default function SignUp() {
 
   const [errorMessage, setErrorMessage] = useState("");
 
+  let unsubscribe = null;
+
+  
+    
+
+ 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+   
+
+    const q = query(collection(db, "Profile"));
+    unsubscribe = onSnapshot(q, (querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        if (number === doc.data().number) {
+          swal({
+            title: "This Number is already Register",
+            icon: "error",
+            button: false,
+            timer: 3000,
+          })
+          
+        }
+        return;
+      });
+    });
+   
+
     try {
+
+
       const docRef = await addDoc(collection(db, "Profile"), {
         name: name,
         age: age,
@@ -74,11 +102,15 @@ export default function SignUp() {
         city: city,
 
       });
+
+    
+     
+
       setName("");
       setAge("");
       setGender("");
       setNumber("");
-      setAvailable("");
+      setAvailable(false);
       setBlood("");
       setCity("");
 
@@ -164,6 +196,7 @@ export default function SignUp() {
                       aria-labelledby="demo-radio-buttons-group-label"
                       defaultValue="female"
                       name="radio-buttons-group"
+                      value={gender}
                     >
                       <FormControlLabel
                         value="female"
