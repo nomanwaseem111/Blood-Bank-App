@@ -15,7 +15,6 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
-import swal from "sweetalert";
 import { NavLink, useNavigate } from "react-router-dom";
 import Checkbox from "@mui/material/Checkbox";
 import FormGroup from "@mui/material/FormGroup";
@@ -24,7 +23,9 @@ import NavBar from "../NavBar/NavBar";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
-import { collection, addDoc, query, onSnapshot } from "firebase/firestore";
+import swal from 'sweetalert';
+
+import { collection, addDoc, query,where, getDocs } from "firebase/firestore";
 import CITIES from "../../api/cities.json";
 import { db } from "../../firebase/firebase";
 function Copyright(props) {
@@ -52,7 +53,7 @@ export default function SignUp() {
 
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
-  const [gender, setGender] = useState("");
+  const [gender, setGender] = useState("male");
   const [number, setNumber] = useState("");
   const [available, setAvailable] = useState(false);
   const [blood, setBlood] = useState("");
@@ -60,53 +61,29 @@ export default function SignUp() {
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  let unsubscribe = null;
-
-  
-    
-
  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-   
-
-    const q = query(collection(db, "Profile"));
-    unsubscribe = onSnapshot(q, (querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        if (number === doc.data().number) {
-          swal({
-            title: "This Number is already Register",
-            icon: "error",
-            button: false,
-            timer: 3000,
-          })
-          
-        }
-        return;
-      });
-    });
-   
-
-    try {
-
-
-      const docRef = await addDoc(collection(db, "Profile"), {
-        name: name,
-        age: age,
-        gender: gender,
-        number: number,
-        available: available,
-        blood: blood,
-        city: city,
-
-      });
-
-    
-     
-
-      setName("");
+    const q = query(
+      collection(db, "Profile"),
+      where("number", "==", number)
+    );
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      try {
+        const docRef = await addDoc(collection(db, "Profile"), {
+          name: name,
+          age: age,
+          gender: gender,
+          number: number,
+          available: available,
+          blood: blood,
+          city: city,
+        });
+        console.log("Document written with ID: ", docRef.id);
+      
+        setName("");
       setAge("");
       setGender("");
       setNumber("");
@@ -114,23 +91,32 @@ export default function SignUp() {
       setBlood("");
       setCity("");
 
+
       swal({
-        title: "Profile Updated",
+        title: "User Profile Updated",
         icon: "success",
         button: false,
         timer: 3000,
       });
-      console.log("Document written with ID: ", docRef.id);
-    } catch (e) {
-      console.error("Error adding document: ", e);
+       
+      } catch (e) {
+        swal({
+          title: e,
+          icon: "error",
+          button: false,
+          timer: 3000,
+        });
+        console.error("Error adding document: ", e);
+      }
+    } else {
+   
       swal({
-        title: e.message,
+        title: "Number Already Registered",
         icon: "error",
         button: false,
         timer: 3000,
       });
     }
-
   };
 
   return (
@@ -153,12 +139,9 @@ export default function SignUp() {
             <Typography component="h1" variant="h5">
               Register as Donor
             </Typography>
-            <Box
-              component="form"
-              noValidate
-              onSubmit={handleSubmit}
-              sx={{ mt: 3 }}
-            >
+            <form               onSubmit={handleSubmit}
+>
+         
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={12}>
                   <TextField
@@ -176,6 +159,8 @@ export default function SignUp() {
 
                 <Grid item xs={12}>
                   <TextField
+                                      required
+
                     type="number"
                     fullWidth
                     id="age"
@@ -188,15 +173,17 @@ export default function SignUp() {
                 </Grid>
 
                 <Grid item xs={12}>
-                  <FormControl>
+                  <FormControl >
                     <FormLabel id="demo-radio-buttons-group-label">
                       Gender
                     </FormLabel>
                     <RadioGroup
                       aria-labelledby="demo-radio-buttons-group-label"
-                      defaultValue="female"
+                      defaultValue="male"
                       name="radio-buttons-group"
                       value={gender}
+                      required
+
                     >
                       <FormControlLabel
                         value="female"
@@ -225,6 +212,8 @@ export default function SignUp() {
                     type="number"
                     fullWidth
                     id="number"
+                    required
+
                     label="Number"
                     name="number"
                     autoComplete="off"
@@ -242,6 +231,8 @@ export default function SignUp() {
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
                       label="bloodGroup"
+                      required
+
                       value={blood}
                       onChange={(e) => setBlood(e.target.value)}
                     >
@@ -253,7 +244,6 @@ export default function SignUp() {
                       <MenuItem value="O- Negative">O-</MenuItem>
                       <MenuItem value="AB+">AB+</MenuItem>
                       <MenuItem value="AB-">AB-</MenuItem>
-
                     </Select>
                   </FormControl>
                 </Grid>
@@ -267,23 +257,21 @@ export default function SignUp() {
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
                       label="Cities"
+                      required
+
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                     >
-                     {
-                      CITIES.map((e,i) => {
-                        return(
-                         <MenuItem key={i} value={e.name}  >{e.name}</MenuItem> 
-
-                        )
-                      })
-                     }
-
+                      {CITIES.map((e, i) => {
+                        return (
+                          <MenuItem key={i} value={e.name}>
+                            {e.name}
+                          </MenuItem>
+                        );
+                      })}
                     </Select>
                   </FormControl>
                 </Grid>
-
-             
 
                 <Grid item xs={12} sm={12}>
                   <FormGroup>
@@ -291,9 +279,8 @@ export default function SignUp() {
                       control={
                         <Checkbox
                           value={available}
-                          onChange={(e) =>
-                           setAvailable(e.target.checked)
-                          }
+
+                          onChange={(e) => setAvailable(true)}
                         />
                       }
                       label="Available"
@@ -311,7 +298,8 @@ export default function SignUp() {
               >
                 Register
               </Button>
-            </Box>
+           
+            </form>
           </Box>
         </Container>
       </ThemeProvider>
