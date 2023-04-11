@@ -28,7 +28,7 @@ const Donor = () => {
     let unsubscribe = null;
 
     const getRealTimeData = async () => {
-      const q = query(collection(db, "Profile"));
+      const q = query(collection(db, "RegisterUser"));
       unsubscribe = onSnapshot(q, (querySnapshot) => {
         const profile = [];
         querySnapshot.forEach((doc) => {
@@ -53,7 +53,7 @@ const Donor = () => {
 
     if(getSearch.length > 0){
 
-      const searchData = data.filter((item) => item.name.toLowerCase().includes(getSearch) || item.city.toLowerCase().includes(getSearch) ||  item.blood.toUpperCase().includes(getSearch) )
+      const searchData = data.filter((item) => item.name.toLowerCase().includes(getSearch) || item.cities.toLowerCase().includes(getSearch) ||  item.blood.toUpperCase().includes(getSearch) )
       setData(searchData);
     }
     else{
@@ -88,9 +88,6 @@ const Donor = () => {
         <Button size="small">Available</Button>
       </CardActions>
     </Card>
-
-
-
     <Card sx={{ width:"400px" }}>
       <CardContent>
         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
@@ -112,9 +109,6 @@ const Donor = () => {
         <Button size="small">Available</Button>
       </CardActions>
     </Card>
-
-
-
     <Card sx={{ width:"400px" }}>
       <CardContent>
         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
@@ -170,8 +164,8 @@ const Donor = () => {
           <td>{e.name}</td>
           <td>{e.gender}</td>
           <td>{e.blood}</td>
-          <td>{e.number}</td>
-          <td>{e.city}</td>
+          <td>0{e.number}</td>
+          <td>{e.cities}</td>
           <td>{e.age}</td>
           <td>{e.available ? "Yes":"No" }</td>
         </tr>

@@ -89,7 +89,9 @@ function ResponsiveAppBar() {
           
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } ,justifyContent:{md:"space-around"} }} >
            <Link style={{color:"#fff"}} to="/donor" >Donor</Link>
-           <Link style={{color:"#fff"}} to="/profile" >Profile</Link>
+           <Link style={{color:"#fff"}} to="/register" >Register</Link>
+           <Link style={{color:"#fff"}} to="/dashboard" >DashBoard</Link>
+
            <Link style={{color:"#fff"}} onClick={handleClick} >Logout</Link>
 
           </Box>

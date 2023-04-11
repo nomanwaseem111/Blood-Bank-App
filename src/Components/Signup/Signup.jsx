@@ -1,33 +1,43 @@
-import React, { useState } from "react";
+import * as React from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import BloodtypeIcon from "@mui/icons-material/Bloodtype";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import swal from "sweetalert";
-import { NavLink, useNavigate } from "react-router-dom";
-import {collection,addDoc} from 'firebase/firestore'
-import { db } from "../../firebase/firebase";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
+import { Link,useNavigate } from "react-router-dom";
+import * as yup from "yup";
 
-
-
-
-
+const validationSchema = yup.object({
+  firstName: yup
+    .string()
+    .min(3, "first name must be at least 3 characters")
+    .required("first name is required"),
+  lastName: yup
+    .string()
+    .min(3, "last name must be at least 3 characters")
+    .required("last name is required"),
+  email: yup.string().email().required("email is required"),
+  password: yup
+    .string()
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
+      "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
+    )
+    .required("Please enter your password"),
+  confirm_password: yup
+    .string()
+    .required()
+    .oneOf([yup.ref("password"), null], "password must match"),
+});
 
 function Copyright(props) {
   return (
@@ -52,75 +62,6 @@ const theme = createTheme();
 export default function SignUp() {
   const navigate = useNavigate();
 
-  const [showPassword,setShowPassword] = useState(false)
-  const [value, setValue] = useState({
-    firstname: "",
-    lastname: "",
-    email: "",
-    password: "",
-    number: "",
-  });
-
-  const [error,setError] = useState("")
-
-  const handleSubmit =  (e) => {
-      e.preventDefault()
-
-        
-        
-  
-      createUserWithEmailAndPassword(auth, value.email, value.password)
-      .then(async(res) => {
-        
-        const user = res.user;
-        try {
-          const docRef = await addDoc(collection(db, "Users"), {
-            firstname: value.firstname,
-            lastname: value.lastname,
-            email: value.email,
-            password: value.password,
-            number: value.number,
-          });
-          console.log("Document written with ID: ", docRef.id);
-        } catch (e) {
-          console.error("Error adding document: ", e);
-        }
-        updateProfile(user, {
-          displayName: value.firstname,
-        });
-        setValue({
-          firstname: "",
-          lastname: "",
-          email: "",
-          password: "",
-          number: "",
-        });
-        swal({
-          title: "Signup Successfully",
-          icon: "success",
-          button: false,
-          timer: 3000,
-        });
-        
-        navigate("/signin");
-      })
-      .catch((error) => {
-        setError(error.message);
-        swal({
-          title: error.message,
-          icon: "error",
-          button: false,
-          timer: 3000,
-        });
-      });
-          
-
-
-        
-      
-
-  }
-
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
@@ -133,112 +74,169 @@ export default function SignUp() {
             alignItems: "center",
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: "red" }}>
-            <BloodtypeIcon />
+          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+            <LockOutlinedIcon />
           </Avatar>
-          <Typography component="h1" variant="h5">
+          <Typography component="h1" variant="h5" marginBottom={{ md: "30px" }}>
             Sign up
           </Typography>
-          <Box
-            component="form"
-            noValidate
-            onSubmit={handleSubmit}
-            sx={{ mt: 3 }}
+
+          <Formik
+            validationSchema={validationSchema}
+            initialValues={{
+              firstName: "",
+              lastName: "",
+              email: "",
+              password: "",
+              confirm_password: "",
+            }}
+            onSubmit={(values, action) => {
+              createUserWithEmailAndPassword(
+                auth,
+                values.email,
+                values.password
+              )
+                .then(async (res) => {
+                  const user = res.user;
+                  try {
+                    const docRef = await addDoc(
+                      collection(db, "signup-users"),
+                      {
+                        firstName: values.firstName,
+                        lastName: values.lastName,
+                        email: values.email,
+                        password: values.password,
+                        confirm_password: values.confirm_password,
+                      }
+                    );
+                    action.resetForm();
+
+                    console.log("Document written with ID: ", docRef.id);
+                  } catch (e) {
+                    console.error("Error adding document: ", e);
+                  }
+                  updateProfile(user, {
+                    displayName: values.firstName,
+                  });
+
+                  swal({
+                    title: "Signup Successfully",
+                    icon: "success",
+                    button: false,
+                    timer: 3000,
+                  });
+
+                  navigate("/signin");
+                })
+                .catch((error) => {
+                  console.log(error.message);
+                  swal({
+                    title: error.message,
+                    icon: "error",
+                    button: false,
+                    timer: 3000,
+                  });
+                });
+            }}
           >
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  autoComplete="off"
-                  name="firstname"
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                  autoFocus
-                  value={value.firstname}
-                  onChange={(e) =>
-                    setValue({ ...value, firstname: e.target.value })
-                  }
-                />
+            <Form>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Field
+                    autoComplete="off"
+                    name="firstName"
+                    required
+                    type="text"
+                    fullWidth
+                    id="firstName"
+                    label="First Name"
+                    autoFocus
+                    placeholder="First Name"
+                  />
+                  <span style={{ color: "red" }}>
+                    <ErrorMessage name="firstName" />
+                  </span>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Field
+                    required
+                    fullWidth
+                    id="lastName"
+                    label="Last Name"
+                    name="lastName"
+                    autoComplete="off"
+                    placeholder="Last Name"
+                    type="text"
+                  />
+                  <span style={{ color: "red" }}>
+                    <ErrorMessage name="lastName" />
+                  </span>
+                </Grid>
+                <Grid item xs={12}>
+                  <Field
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    autoComplete="off"
+                    placeholder="Email"
+                    type="email"
+                  />
+                  <span style={{ color: "red" }}>
+                    <ErrorMessage name="email" />
+                  </span>
+                </Grid>
+                <Grid item xs={12}>
+                  <Field
+                    required
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    type="password"
+                    id="password"
+                    autoComplete="off"
+                    placeholder="Password"
+                  />
+                  <span style={{ color: "red" }}>
+                    <ErrorMessage name="password" />
+                  </span>
+                </Grid>
+                <Grid item xs={12}>
+                  <Field
+                    required
+                    fullWidth
+                    name="confirm_password"
+                    label="Password"
+                    type="password"
+                    id="password"
+                    autoComplete="off"
+                    placeholder="Confirm Password"
+                  />
+                  <span style={{ color: "red" }}>
+                    <ErrorMessage name="confirm_password" />
+                  </span>
+                </Grid>
               </Grid>
-
-
-
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastname"
-                  autoComplete="off"
-                  value={value.lastname}
-                  onChange={(e) =>
-                    setValue({ ...value, lastname: e.target.value })
-                  }
-                />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+              >
+                Sign Up
+              </Button>
+              <Grid container justifyContent="flex-end">
+                <Grid item>
+                  <Link to='/signin' variant="body2">
+                    Already have an account? Sign in
+                  </Link>
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="off"
-                  value={value.email}
-                  onChange={(e) =>
-                    setValue({ ...value, email: e.target.value })
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  autoComplete="off"
-                  value={value.password}
-                  onChange={(e) =>
-                    setValue({ ...value, password: e.target.value })
-                  }
-                />
-                <VisibilityOffIcon value={showPassword}  onClick={() => setShowPassword(!showPassword)} />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  name="number"
-                  label="Number"
-                  type="number"
-                  id="number"
-                  autoComplete="off"
-                  value={value.number}
-                  onChange={(e) =>
-                    setValue({ ...value, number: e.target.value })
-                  }
-                />
-              </Grid>
-            </Grid>
-            <span>{error}</span>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              Sign Up
-            </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <NavLink to="/signin" variant="body2">
-                  Already have an account? Sign in
-                </NavLink>
-              </Grid>
-            </Grid>
-          </Box>
+            </Form>
+          </Formik>
         </Box>
+        <Copyright sx={{ mt: 5 }} />
       </Container>
     </ThemeProvider>
   );

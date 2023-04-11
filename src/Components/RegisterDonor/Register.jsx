@@ -18,14 +18,16 @@ import FormLabel from "@mui/material/FormLabel";
 import { NavLink, useNavigate } from "react-router-dom";
 import Checkbox from "@mui/material/Checkbox";
 import FormGroup from "@mui/material/FormGroup";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 import NavBar from "../NavBar/NavBar";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
-import swal from 'sweetalert';
+import swal from "sweetalert";
 
-import { collection, addDoc, query,where, getDocs } from "firebase/firestore";
+import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
 import CITIES from "../../api/cities.json";
 import { db } from "../../firebase/firebase";
 function Copyright(props) {
@@ -48,76 +50,83 @@ function Copyright(props) {
 
 const theme = createTheme();
 
+const phoneRegExp =
+  /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
+
+const validationSchema = Yup.object().shape({
+  name: Yup.string().min(3).max(20).required("Name is required"),
+  age: Yup.number()
+    .required("Age is required")
+    .min(18, "You must be at least 18 years old")
+    .max(99),
+  number: Yup.string()
+    .matches(/^[0-9]{10}$/, "Please enter valid Phone Number")
+    .required("Phone number is required"),
+  cities: Yup.string().required("Cities is required"),
+  blood: Yup.string().required("Blood Type is required"),
+  gender: Yup.string().required("gender is required"),
+  available: Yup.boolean(),
+});
+
 export default function SignUp() {
-  const navigate = useNavigate();
+  const { handleBlur,touched, handleSubmit, handleChange, errors, values } = useFormik({
+    initialValues: {
+      name: "",
+      age: "",
+      number: "",
+      gender: "male",
 
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [gender, setGender] = useState("male");
-  const [number, setNumber] = useState("");
-  const [available, setAvailable] = useState(false);
-  const [blood, setBlood] = useState("");
-  const [city, setCity] = useState("");
+      cities: "",
+      blood: "",
+      available: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values,action) => {
+      console.log(values);
 
-  const [errorMessage, setErrorMessage] = useState("");
-
- 
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const q = query(
-      collection(db, "Profile"),
-      where("number", "==", number)
-    );
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) {
-      try {
-        const docRef = await addDoc(collection(db, "Profile"), {
-          name: name,
-          age: age,
-          gender: gender,
-          number: number,
-          available: available,
-          blood: blood,
-          city: city,
-        });
-        console.log("Document written with ID: ", docRef.id);
-      
-        setName("");
-      setAge("");
-      setGender("");
-      setNumber("");
-      setAvailable(false);
-      setBlood("");
-      setCity("");
-
-
-      swal({
-        title: "User Profile Updated",
-        icon: "success",
-        button: false,
-        timer: 3000,
-      });
-       
-      } catch (e) {
+      const q = query(
+        collection(db, "RegisterUser"),
+        where("number", "==", values.number)
+      );
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        try {
+          const docRef = await addDoc(collection(db, "RegisterUser"), {
+            name: values.name,
+            age: values.age,
+            gender: values.gender,
+            number: values.number,
+            available: values.available,
+            blood: values.blood,
+            cities: values.cities,
+          });
+          console.log("Document written with ID: ", docRef.id);
+           action.resetForm()
+          swal({
+            title: "User Profile Updated",
+            icon: "success",
+            button: false,
+            timer: 3000,
+          });
+        } catch (e) {
+          swal({
+            title: e,
+            icon: "error",
+            button: false,
+            timer: 3000,
+          });
+          console.error("Error adding document: ", e);
+        }
+      } else {
         swal({
-          title: e,
+          title: "Number Already Registered",
           icon: "error",
           button: false,
           timer: 3000,
         });
-        console.error("Error adding document: ", e);
       }
-    } else {
-   
-      swal({
-        title: "Number Already Registered",
-        icon: "error",
-        button: false,
-        timer: 3000,
-      });
-    }
-  };
+    },
+  });
 
   return (
     <>
@@ -139,9 +148,7 @@ export default function SignUp() {
             <Typography component="h1" variant="h5">
               Register as Donor
             </Typography>
-            <form               onSubmit={handleSubmit}
->
-         
+            <form onSubmit={handleSubmit}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={12}>
                   <TextField
@@ -151,75 +158,92 @@ export default function SignUp() {
                     fullWidth
                     id="name"
                     label="Name"
+                    type="text"
                     autoFocus
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.name}
                   />
+                  <span style={{ color: "red" }}>
+                    {
+                      errors.name && touched.name ? (<span>{errors.name}</span>) : null
+                    }
+                  </span>
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={12}>
                   <TextField
-                                      required
-
-                    type="number"
+                    required
+                    autoComplete="off"
+                    name="age"
                     fullWidth
                     id="age"
                     label="Age"
-                    name="age"
-                    autoComplete="off"
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
+                    type="number"
+                    autoFocus
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.age}
                   />
+                 <span style={{ color: "red" }}>
+                    {
+                      errors.age && touched.age ? (<span>{errors.age}</span> ): null
+                    }
+                  </span>
+                </Grid>
+
+                <Grid item xs={12} sm={12}>
+                  <TextField
+                    required
+                    autoComplete="off"
+                    name="number"
+                    fullWidth
+                    id="number"
+                    label="Number"
+                    type="number"
+                    autoFocus
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.number}
+                  />
+                <span style={{ color: "red" }}>
+                    {
+                      errors.number && touched.number ? (<span>{errors.number}</span>) : null
+                    }
+                  </span>
                 </Grid>
 
                 <Grid item xs={12}>
-                  <FormControl >
+                  <FormControl>
                     <FormLabel id="demo-radio-buttons-group-label">
                       Gender
                     </FormLabel>
                     <RadioGroup
                       aria-labelledby="demo-radio-buttons-group-label"
                       defaultValue="male"
-                      name="radio-buttons-group"
-                      value={gender}
                       required
-
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      value={values.gender}
+                      name="gender"
                     >
                       <FormControlLabel
                         value="female"
                         control={<Radio />}
                         label="Female"
-                        onChange={(e) => setGender(e.target.value)}
                       />
                       <FormControlLabel
                         value="male"
                         control={<Radio />}
                         label="Male"
-                        onChange={(e) => setGender(e.target.value)}
                       />
                       <FormControlLabel
                         value="other"
                         control={<Radio />}
                         label="Other"
-                        onChange={(e) => setGender(e.target.value)}
                       />
                     </RadioGroup>
                   </FormControl>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextField
-                    type="number"
-                    fullWidth
-                    id="number"
-                    required
-
-                    label="Number"
-                    name="number"
-                    autoComplete="off"
-                    value={number}
-                    onChange={(e) => setNumber(e.target.value)}
-                  />
                 </Grid>
 
                 <Grid item xs={12}>
@@ -232,9 +256,10 @@ export default function SignUp() {
                       id="demo-simple-select"
                       label="bloodGroup"
                       required
-
-                      value={blood}
-                      onChange={(e) => setBlood(e.target.value)}
+                      name="blood"
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      value={values.blood}
                     >
                       <MenuItem value="A+ Positive">A+</MenuItem>
                       <MenuItem value="A- Negative">A-</MenuItem>
@@ -258,9 +283,10 @@ export default function SignUp() {
                       id="demo-simple-select"
                       label="Cities"
                       required
-
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
+                      name="cities"
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      value={values.cities}
                     >
                       {CITIES.map((e, i) => {
                         return (
@@ -278,9 +304,10 @@ export default function SignUp() {
                     <FormControlLabel
                       control={
                         <Checkbox
-                          value={available}
-
-                          onChange={(e) => setAvailable(true)}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          value={values.available}
+                          name="available"
                         />
                       }
                       label="Available"
@@ -289,7 +316,6 @@ export default function SignUp() {
                 </Grid>
               </Grid>
 
-              <span className="errorMessage">{errorMessage}</span>
               <Button
                 type="submit"
                 fullWidth
@@ -298,7 +324,6 @@ export default function SignUp() {
               >
                 Register
               </Button>
-           
             </form>
           </Box>
         </Container>
