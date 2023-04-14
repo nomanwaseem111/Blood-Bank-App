@@ -28,7 +28,7 @@ const Donor = () => {
     let unsubscribe = null;
 
     const getRealTimeData = async () => {
-      const q = query(collection(db, "RegisterUser"));
+      const q = query(collection(db, "Register user react hook form"));
       unsubscribe = onSnapshot(q, (querySnapshot) => {
         const profile = [];
         querySnapshot.forEach((doc) => {
@@ -164,7 +164,7 @@ const Donor = () => {
           <td>{e.name}</td>
           <td>{e.gender}</td>
           <td>{e.blood}</td>
-          <td>0{e.number}</td>
+          <td>{e.number}</td>
           <td>{e.cities}</td>
           <td>{e.age}</td>
           <td>{e.available ? "Yes":"No" }</td>

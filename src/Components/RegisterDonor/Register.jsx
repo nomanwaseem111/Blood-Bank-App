@@ -30,6 +30,8 @@ import swal from "sweetalert";
 import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
 import CITIES from "../../api/cities.json";
 import { db } from "../../firebase/firebase";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 function Copyright(props) {
   return (
     <Typography
@@ -53,14 +55,13 @@ const theme = createTheme();
 const phoneRegExp =
   /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
 
-const validationSchema = Yup.object().shape({
+const schema = Yup.object().shape({
   name: Yup.string().min(3).max(20).required("Name is required"),
   age: Yup.number()
     .required("Age is required")
     .min(18, "You must be at least 18 years old")
     .max(99),
-  number: Yup.string()
-    .matches(/^[0-9]{10}$/, "Please enter valid Phone Number")
+    number: Yup.string().min(11, "please Valid Phone number").max(11, "please Valid Phone number")
     .required("Phone number is required"),
   cities: Yup.string().required("Cities is required"),
   blood: Yup.string().required("Blood Type is required"),
@@ -69,64 +70,72 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function SignUp() {
-  const { handleBlur,touched, handleSubmit, handleChange, errors, values } = useFormik({
-    initialValues: {
+  
+  const navigate = useNavigate()
+
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
       name: "",
       age: "",
       number: "",
-      gender: "male",
-
+      gender: "",
       cities: "",
-      blood: "",
       available: "",
+      blood:""
     },
-    validationSchema: validationSchema,
-    onSubmit: async (values,action) => {
-      console.log(values);
+    resolver: yupResolver(schema),
+  });
 
-      const q = query(
-        collection(db, "RegisterUser"),
-        where("number", "==", values.number)
-      );
-      const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) {
-        try {
-          const docRef = await addDoc(collection(db, "RegisterUser"), {
-            name: values.name,
-            age: values.age,
-            gender: values.gender,
-            number: values.number,
-            available: values.available,
-            blood: values.blood,
-            cities: values.cities,
-          });
-          console.log("Document written with ID: ", docRef.id);
-           action.resetForm()
-          swal({
-            title: "User Profile Updated",
-            icon: "success",
-            button: false,
-            timer: 3000,
-          });
-        } catch (e) {
-          swal({
-            title: e,
-            icon: "error",
-            button: false,
-            timer: 3000,
-          });
-          console.error("Error adding document: ", e);
-        }
-      } else {
+  const onSubmit = async (data) => {
+
+    const q = query(
+      collection(db, "Register user react hook form"),
+      where("number", "==", data.number)
+    );
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      try {
+        const docRef = await addDoc(collection(db, "Register user react hook form"), {
+          name: data.name,
+          age: data.age,
+          gender: data.gender,
+          number: data.number,
+          available: data.available,
+          blood: data.blood,
+          cities: data.cities,
+        });
+        console.log("Document written with ID: ", docRef.id);
+        
         swal({
-          title: "Number Already Registered",
+          title: "User Profile Updated",
+          icon: "success",
+          button: false,
+          timer: 3000,
+        });
+        navigate('/donor')
+      } catch (e) {
+        swal({
+          title: e,
           icon: "error",
           button: false,
           timer: 3000,
         });
+        console.error("Error adding document: ", e);
       }
-    },
-  });
+    } else {
+      swal({
+        title: "Number Already Registered",
+        icon: "error",
+        button: false,
+        timer: 3000,
+      })
+    }
+  }
+    
 
   return (
     <>
@@ -148,11 +157,11 @@ export default function SignUp() {
             <Typography component="h1" variant="h5">
               Register as Donor
             </Typography>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={12}>
                   <TextField
-                    required
+                    
                     autoComplete="off"
                     name="name"
                     fullWidth
@@ -160,58 +169,43 @@ export default function SignUp() {
                     label="Name"
                     type="text"
                     autoFocus
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    value={values.name}
+                    {...register("name", { required: true })}
                   />
-                  <span style={{ color: "red" }}>
-                    {
-                      errors.name && touched.name ? (<span>{errors.name}</span>) : null
-                    }
-                  </span>
+                  <p style={{ color: "red" }}>{errors.name?.message}</p>
                 </Grid>
 
                 <Grid item xs={12} sm={12}>
                   <TextField
-                    required
                     autoComplete="off"
-                    name="age"
                     fullWidth
                     id="age"
                     label="Age"
                     type="number"
+                    name="age"
+
                     autoFocus
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    value={values.age}
+                    {...register("age", { required: true })}
                   />
-                 <span style={{ color: "red" }}>
-                    {
-                      errors.age && touched.age ? (<span>{errors.age}</span> ): null
-                    }
-                  </span>
+                  <p style={{ color: "red" }}>{errors.age?.message}</p>
                 </Grid>
 
                 <Grid item xs={12} sm={12}>
                   <TextField
-                    required
                     autoComplete="off"
-                    name="number"
                     fullWidth
                     id="number"
                     label="Number"
                     type="number"
                     autoFocus
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    value={values.number}
+                    name="number"
+
+                    {...register("number", { required: true })}
                   />
-                <span style={{ color: "red" }}>
-                    {
-                      errors.number && touched.number ? (<span>{errors.number}</span>) : null
-                    }
-                  </span>
+                  <p style={{ color: "red" }}>{errors.number?.message}</p>
                 </Grid>
+
+
+
 
                 <Grid item xs={12}>
                   <FormControl>
@@ -221,26 +215,30 @@ export default function SignUp() {
                     <RadioGroup
                       aria-labelledby="demo-radio-buttons-group-label"
                       defaultValue="male"
-                      required
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      value={values.gender}
+                      
                       name="gender"
+                     
+
                     >
                       <FormControlLabel
-                        value="female"
                         control={<Radio />}
                         label="Female"
+                        value="female"
+                        {...register('gender', {required:true})}
                       />
                       <FormControlLabel
-                        value="male"
                         control={<Radio />}
                         label="Male"
+                        value="male"
+                        {...register('gender', {required:true})}
+
                       />
                       <FormControlLabel
-                        value="other"
                         control={<Radio />}
                         label="Other"
+                        value="other"
+                        {...register('gender', {required:true})}
+
                       />
                     </RadioGroup>
                   </FormControl>
@@ -255,11 +253,9 @@ export default function SignUp() {
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
                       label="bloodGroup"
-                      required
                       name="blood"
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      value={values.blood}
+
+                      {...register("blood", { required: true })}
                     >
                       <MenuItem value="A+ Positive">A+</MenuItem>
                       <MenuItem value="A- Negative">A-</MenuItem>
@@ -270,6 +266,8 @@ export default function SignUp() {
                       <MenuItem value="AB+">AB+</MenuItem>
                       <MenuItem value="AB-">AB-</MenuItem>
                     </Select>
+                    <p style={{ color: "red" }}>{errors.blood?.message}</p>
+
                   </FormControl>
                 </Grid>
 
@@ -282,11 +280,8 @@ export default function SignUp() {
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
                       label="Cities"
-                      required
                       name="cities"
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      value={values.cities}
+                      {...register("cities", { required: true })}
                     >
                       {CITIES.map((e, i) => {
                         return (
@@ -296,6 +291,7 @@ export default function SignUp() {
                         );
                       })}
                     </Select>
+                    <p style={{ color: "red" }}>{errors.cities?.message}</p>
                   </FormControl>
                 </Grid>
 
@@ -303,12 +299,7 @@ export default function SignUp() {
                   <FormGroup>
                     <FormControlLabel
                       control={
-                        <Checkbox
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          value={values.available}
-                          name="available"
-                        />
+                        <Checkbox {...register("available")} name="available" />
                       }
                       label="Available"
                     />
